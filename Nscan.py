@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# Autor: olive
+# Nome: Nmap
+
 import nmap
 import os
 import subprocess
@@ -15,7 +19,7 @@ class nmap:
         scanner.portas = args2
         
         subprocess.run('clear')
-        os.system('sh banner.sh')
+        os.system("sh banner.sh")
         time.sleep(1)
         print ("\n\033[01;92mScaneando... > \033[01;93m{} \033[01;92mPortas > \033[01;93m{}\033[0m".format(args1, args2))
         n.scan(scanner.target, scanner.portas)
