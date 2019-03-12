@@ -8,11 +8,10 @@ import subprocess
 import time
 import sys
 
-
-args1, args2, = sys.argv[1], sys.argv[2]
+args1, args2 = sys.argv[1], sys.argv[2]
 
 n = nmap.PortScanner()
-    
+
 class nmap:
     def __init__(scanner, target, portas):
         scanner.target = args1
