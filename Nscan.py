@@ -1,108 +1,117 @@
 #!/usr/bin/env python3
-# Autor: olive
-# Nome: Nscan
-# Descrição: simples scanner de portas.
-# Versão: beta. v0.1
-# mais sobre o autor:
-# ===================================================
-# = Site: https://olivetech933842787.wordpress.com
-# = Pagina: https://facebook.com/oliveobom
-# = Canal yt: https://www.youtube.com/channel/UC6gMF4GxvOwuC7q7biSKFDA
-# ====================================================
+# nome: Nscan
+# descrição: Simples scanner de portas e serviços
+# versao: beta: v0.2
 
-
-# importação das bibliotecas necessárias para funcionamento correto
+# importação de bibliotecas necessárias
+import optparse
 import nmap
-import os
-import subprocess
 import time
-import sys
+import subprocess
+import os
 
-# Criando objeto de scan
-n = nmap.PortScanner()
-# Criando objeto de data recente
+# função de verificação de dependencias
+def ch():
+    if os.path.exists('/data/data/com.termux/files/usr/bin/python') == False :
+        if os.path.exists('/data/data/com.termux/files/usr/bin/nmap') == False :
+            if os.path.exists('/data/data/com.termux/files/usr/lib/python3.7/nmap') == False :
+                os.system('bash ./install.sh')
+            else:
+                return 0
+        else:
+            return 0
+    else:
+        return 0
+
+# chamando função de verificação
+ch()
+
+# criando objetos (objetos de=[opçôes, Scan, data & hora & minutos)
+parse = optparse.OptionParser()
+Nscan = nmap.PortScanner()
 data = time.localtime()
 H = time.gmtime()
 
-if len(sys.argv) < 4:
-    subprocess.run('clear')
-    print('Usage Nscan.py: \n\n\n./Nscan.py [target] [portas] [comando linha]')
-    print("\n\nExemplo Nscan.py: \n\n\n./Nscan.py testphp.vulnweb.com 21-22 '-sV'\n")
-    print('\n\nCopyright Nscan.py')
-    exit()
+# criando opçoes
+parse.add_option('-?', '--all', action='help', help='Ajuda', dest='ajuda', metavar='AJUDA')
+parse.add_option('-t', '--target', help='Seleciona o alvo', dest='target', metavar='TARGET')
+parse.add_option('-p', '--port', help='Seleciona a porta expecifica pro alvo', dest='port', metavar='PORT')
+parse.add_option('-c', '--comando', help='Seleciona um tipo de scan expecifica pro alvo [service/version/detection system OS', dest='comando', metavar='COMANDO')
 
-# Criando Class (nmap)
-class nmap:
-    # Inicializando a função de inicialização principal (__init_)
-    # passando 3 atributos como argumentos para a classe
-    # nmap (target, porta_inicial, porta_final) 
-    # e um atributo principal de scan (scanner)
-    def __init__(scanner, target, portas, comando_linha):
-        # Começando a criar os atributos (variaveis
-        # de dentro da classe)
-        scanner.target = target
-        scanner.portas = portas
-        scanner.comando_linha = comando_linha
-        
-        # limpar a tela antes de execução do programa
+# passando os argumentos e opçôes para as variáveis (args & options)
+(args, options) = parse.parse_args()
+
+# criando classe (Nmap)
+class Nmap:
+    def __init__(olive, target, port, comando):
+        olive.target = target
+        olive.port = port
+        olive.comando = comando
+
+    # função de scan
+    def scan(olive):
         subprocess.run('clear')
-        # Exibi o banner do programa
-        os.system("sh banner.sh")
-        # esperar 1 segundo antes de executar o proximo passo
+        print('\033[01;94mScanning....\n')
         time.sleep(1)
+        print('\n\t\t\t\033[01;96;44mBy: olive\033[0m')
+        print('\n\033[01;92mScan em execução, por favor aguarde o processo de scan terminar\n')
+        print('\n\033[01;94mDados passados na entrada\n')
+        print('\033[01;92m-'*25)
+        print('\033[01;96mHost: \033[01;91m{}\n\033[01;96mPorta: \033[01;91m{}\n\033[01;96mComando linha: \033[01;91mnmap {}\n'.format(olive.target, olive.port, olive.comando))
+        print('\033[01;92m-'*25)
+        time.sleep(2)
+        Nscan.scan(olive.target, olive.port, olive.comando)
+    
+    # função de exibi o resultado do scan
+    def imprime(olive):
+        print('\n\033[01;96mResultados do scan\n')
+        for host in Nscan.all_hosts():
+            print('\n\033[01;96mIP: \033[01;92m[\033[01;91m{}\033[01;92m], \033[01;96msite: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(host, Nscan[host].hostname()))
+            for proto in Nscan[host].all_protocols():
+                print('\033[01;96mProtocolo: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(proto))
+                print('\033[01;96mState: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(Nscan[host].state()))
 
-
-    # Criando uma função que irar fazer o scan dos dados
-    # passados como argumentos (parametros= 
-    # target,porta_inicial, porta_final)
-    def scan(scanner):
-        print ("\n\033[01;92mScan iniciado por, favor aguarde o termino do scan...\n\nHost:> \033[01;93m{}\n\033[01;92mPortas:> \033[01;93m[{}] \n\033[01;92mComando linha: \033[01;93m{}\033[0m\n".format(scanner.target, scanner.portas, scanner.comando_linha))
-        # scan em andamento
-        n.scan(scanner.target, scanner.portas, scanner.comando_linha)
-    # criando outra função que mostrará o resultado do scan feito
-    def imprime_resultado(scanner):
-        # Exibi uma menssagem com texto 'Resultados'
-        print("\033[01;96mResultados\033[0m\n")
-        # para cada host que estiver na lista n.all_hosts()
-        # faça, 
-        for host in n.all_hosts():
-            # imprima o ip do host, e imprima o próprio host
-            print("\033[01;93mIP: \033[01;91m{}, \033[01;93mSite: \033[01;91m{}\033[0m".format(host, n[host].hostname()))
-            # para cada protocolo que estiver na 
-            # lista n[host].all_protocols(), faça
-            for proto in n[host].all_protocols():
-                # imprima na tela o protocolo apenas
-                print("\033[01;93mProtocolo: \033[01;91m{}\033[0m".format(proto))
-                # imprima na tela o estado apenas
-                print("\033[01;93mState: \033[01;91m{}\033[0m".format(n[host].state()))
-                
-                # pasando para variavel (lport) todas as chaves
-                # do dicionario n[host][proto].keys()
-                lport = n[host][proto].keys()
-                # convertendo o dicionario lport em lista
+                lport = Nscan[host][proto].keys()
                 lport = list(lport)
-                # colocando a lista em ordem
                 lport.sort()
-                
-                # para cada porta que estiver na lista lport
-                # faça,
+
                 for porta in lport:
-                    # imprima a porta e o estado desta porta
-                    # se estar aberta ou fechada (rodando
-                    # algum serviço no host)
-                    print("\033[01;93mPorta: \033[01;91m{}, \033[01;93mEstado: \033[01;91m{}\033[0m".format(porta, n[host][proto][porta]['state']))
-                    # Deixar uma linha em branco
-                    print ("")
-                    # exibi um texto de 'scanner completo'
-                    # data recente do scan
-                print("\033[01;94mScanner completo. \ndata recente: {}/{}/{} : hora: {} Minuto: {}\033[0m".format(data[2], data[1], data[0], data[3], H[4]))
+                    print('\033[01;96mPorta: \033[01;92m[\033[01;91m{}\033[01;92m], \033[01;96mEstado: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(porta, Nscan[host][proto][porta]['state']))
 
 
-# passando a classe para uma variavel (scan_finalizado)
-scan_finalizado = nmap(sys.argv[1], sys.argv[2],sys.argv[3])
-# chamando a função scan()
-scan_finalizado.scan()
-# chamando a função imprime_resultado()
-scan_finalizado.imprime_resultado()
 
-# Copyright olive
+# verificando se Nscan receberar algum parametro
+if args.target == None:
+    subprocess.run('clear')
+    os.system('bash banner.sh')
+
+    print('\n\n\033[01;92;41mInvalid\033[0m \033[01;96m[\033[01;92m!\033[01;96m] \033[0m -h/--help\n\n')
+elif args.target:
+    if args.target.lower() [0] == "h":
+        print("\n\nInsira o site sem o 'HTTP' ou 'HTTPS'\nExemplo: testphp.vulnweb.com\n\n")
+    elif args.target.lower() [0] != "http" or "https":
+        if args.target:
+            if args.port:
+                if args.comando:
+
+                    # excessão de parametros invalidos
+                    try:
+
+                        Nmap_Res = Nmap(args.target, args.port, args.comando)
+                        # excessão de parada forçada
+                        try:
+                            Nmap_Res.scan()
+                            Nmap_Res.imprime()
+                            print("\n\033[01;94mScanner completo. \ndata recente: {}/{}/{} : hora: {} Minuto: {}\033[0m".format(data[2], data[1], data[0], data[3], H[4]))
+                        except KeyboardInterrupt:
+                            print("\nParada forçada\n")
+                            exit()
+                            # fim da excessão da parada forçada
+
+                    except nmap.nmap.PortScannerError:
+                        print('\nPermissão negada. Este parâmetro requer, permissão de ROOT. use o sudo para prosseguir\n')
+
+                else:
+                    print('Insira os parametros')
+            else:
+                print('Insira a porta')
