@@ -1,117 +1,118 @@
-#!/usr/bin/env python3
-# nome: Nscan
-# descrição: Simples scanner de portas e serviços
-# versao: beta: v0.2
+#!/bin/env python3
+# Name: Nscan
+# Describe: Escaner de portas de serviços remotos
+# Lisense: MIT Lisense
+# Author: Olive <https://tecnospeed.000webhostapp.com/>
+# Version: 2.1
 
-# importação de bibliotecas necessárias
+# Necessary modules:
+from os import system
 import optparse
 import nmap
 import time
-import subprocess
-import os
 
-# função de verificação de dependencias
-def ch():
-    if os.path.exists('/data/data/com.termux/files/usr/bin/python') == False :
-        if os.path.exists('/data/data/com.termux/files/usr/bin/nmap') == False :
-            if os.path.exists('/data/data/com.termux/files/usr/lib/python3.7/nmap') == False :
-                os.system('bash ./install.sh')
-            else:
-                return 0
-        else:
-            return 0
-    else:
-        return 0
+# Check necessary dependencies:
+def check():
+    requires = ['tput', 'figlet']
+    _bin = '/data/data/com.termux/files/usr/bin'
+    _bin = list(_bin)
+    _bin.sort()
+    for packageRequired in requires:
+        text = "Requires Package => {}".format(packageRequired)
+        if(packageRequired not in _bin):
+            print(text)
 
-# chamando função de verificação
-ch()
 
-# criando objetos (objetos de=[opçôes, Scan, data & hora & minutos)
+# Invoke function from Verify Dependecies:
+#check()
+
+# Create Options:
 parse = optparse.OptionParser()
-Nscan = nmap.PortScanner()
-data = time.localtime()
-H = time.gmtime()
+parse.add_option('-t', '--target', help='Select target to be scanned', dest='target', metavar='TARGET')
+parse.add_option('-p', '--port', help='Select the port to be scanned', dest='port', metavar='PORT')
+parse.add_option('-c', '--command', help='Select the command line to be scanned', dest='command', metavar='COMMAND_LINE')
 
-# criando opçoes
-parse.add_option('-?', '--all', action='help', help='Ajuda', dest='ajuda', metavar='AJUDA')
-parse.add_option('-t', '--target', help='Seleciona o alvo', dest='target', metavar='TARGET')
-parse.add_option('-p', '--port', help='Seleciona a porta expecifica pro alvo', dest='port', metavar='PORT')
-parse.add_option('-c', '--comando', help='Seleciona um tipo de scan expecifica pro alvo [service/version/detection system OS', dest='comando', metavar='COMANDO')
 
-# passando os argumentos e opçôes para as variáveis (args & options)
-(args, options) = parse.parse_args()
+# Options and Arguments:
+(options, args) = parse.parse_args()
 
-# criando classe (Nmap)
+# Class nmap:
 class Nmap:
-    def __init__(olive, target, port, comando):
-        olive.target = target
-        olive.port = port
-        olive.comando = comando
+    def __init__(self, Ip_Adress, Door_Quatities, Nmap_Command_Line_Options):
+        self.Ip_Adress = Ip_Adress
+        self.Door_Quatities = Door_Quatities
+        self.Nmap_Command_Line_Options = Nmap_Command_Line_Options+' -p {}'.format(self.Door_Quatities)
+        self.Temporary_Records = []
+        self.Nscan = nmap.PortScanner()
+        self.version = '2.1'
+        self.times = list(time.localtime())
 
-    # função de scan
-    def scan(olive):
-        subprocess.run('clear')
-        print('\033[01;94mScanning....\n')
-        time.sleep(1)
-        print('\n\t\t\t\033[01;96;44mBy: olive\033[0m')
-        print('\n\033[01;92mScan em execução, por favor aguarde o processo de scan terminar\n')
-        print('\n\033[01;94mDados passados na entrada\n')
-        print('\033[01;92m-'*25)
-        print('\033[01;96mHost: \033[01;91m{}\n\033[01;96mPorta: \033[01;91m{}\n\033[01;96mComando linha: \033[01;91mnmap {}\n'.format(olive.target, olive.port, olive.comando))
-        print('\033[01;92m-'*25)
-        time.sleep(2)
-        Nscan.scan(olive.target, olive.port, olive.comando)
-    
-    # função de exibi o resultado do scan
-    def imprime(olive):
-        print('\n\033[01;96mResultados do scan\n')
-        for host in Nscan.all_hosts():
-            print('\n\033[01;96mIP: \033[01;92m[\033[01;91m{}\033[01;92m], \033[01;96msite: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(host, Nscan[host].hostname()))
-            for proto in Nscan[host].all_protocols():
-                print('\033[01;96mProtocolo: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(proto))
-                print('\033[01;96mState: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(Nscan[host].state()))
+    def scanning(self):
+        try:
+            print('Starting Nscan {} ( {} ) at {}-{}-{} {}:{} -{}'.format(self.version, self.Ip_Adress, self.times[0], self.times[1], self.times[2], self.times[3], self.times[4], self.times[5]))
+            self.Nscan.scan(self.Ip_Adress, arguments=self.Nmap_Command_Line_Options)
+        except nmap.nmap.PortScannerError:
+            print('Permissão negada! você não tem privilégio administrativo Para continuar, conceda acesso de super-usuário ao comando ou coloque o sudo antes do comando.')
+            exit()
 
-                lport = Nscan[host][proto].keys()
-                lport = list(lport)
-                lport.sort()
-
-                for porta in lport:
-                    print('\033[01;96mPorta: \033[01;92m[\033[01;91m{}\033[01;92m], \033[01;96mEstado: \033[01;92m[\033[01;91m{}\033[01;92m]\n'.format(porta, Nscan[host][proto][porta]['state']))
-
-
-
-# verificando se Nscan receberar algum parametro
-if args.target == None:
-    subprocess.run('clear')
-    os.system('bash banner.sh')
-
-    print('\n\n\033[01;92;41mInvalid\033[0m \033[01;96m[\033[01;92m!\033[01;96m] \033[0m -h/--help\n\n')
-elif args.target:
-    if args.target.lower() [0] == "h":
-        print("\n\nInsira o site sem o 'HTTP' ou 'HTTPS'\nExemplo: testphp.vulnweb.com\n\n")
-    elif args.target.lower() [0] != "http" or "https":
-        if args.target:
-            if args.port:
-                if args.comando:
-
-                    # excessão de parametros invalidos
-                    try:
-
-                        Nmap_Res = Nmap(args.target, args.port, args.comando)
-                        # excessão de parada forçada
-                        try:
-                            Nmap_Res.scan()
-                            Nmap_Res.imprime()
-                            print("\n\033[01;94mScanner completo. \ndata recente: {}/{}/{} : hora: {} Minuto: {}\033[0m".format(data[2], data[1], data[0], data[3], H[4]))
-                        except KeyboardInterrupt:
-                            print("\nParada forçada\n")
-                            exit()
-                            # fim da excessão da parada forçada
-
-                    except nmap.nmap.PortScannerError:
-                        print('\nPermissão negada. Este parâmetro requer, permissão de ROOT. use o sudo para prosseguir\n')
-
+    def prints(self):
+        for host in self.Nscan.all_hosts():
+            self.Temporary_Records.append(self.Nscan.get_nmap_last_output())
+            fileLog = open('scan.log', 'w')
+            fileLog.write(self.Temporary_Records[0])
+            fileLog.close()
+            print('\n\033[0mIp Adress: (\033[00;92m{}\033[0m), Website: (\033[00;92m{}\033[0m)'.format(host, self.Nscan[host].hostname()))
+            for key in self.Nscan.analyse_nmap_xml_scan()['nmap']['scaninfo']['tcp']:
+                if "osmatch" == key:
+                    print('\033[0mMethod: (\033[00;92m{}\033[0m), Osmatch: (\033[00;92m{}\033[0m)'.format(self.Nscan.analyse_nmap_xml_scan()['nmap']['scaninfo']['tcp']['method'], self.Nscan[host]['osmatch'][0]['name']))
                 else:
-                    print('Insira os parametros')
+                    pass
+                pass
+            for key in self.Nscan[host]:
+                if "osmatch" == key:
+                    print('\033[0mVendor: (\033[00;92m{}\033[0m), Osfamily: (\033[00;92m{}\033[0m), Osgen: (\033[00;92m{}\033[0m)'.format(self.Nscan[host]['osmatch'][0]['osclass'][0]['vendor'], self.Nscan[host]['osmatch'][0]['osclass'][0]['osfamily'], self.Nscan[host]['osmatch'][0]['osclass'][0]['osgen']))
+                    print('\033[0mTimestr: (\033[00;92m{}\033[0m), command_line: (\033[00;92m{}\033[0m)'.format(self.Nscan.scanstats()['timestr'], self.Nscan.command_line()))
+                    break
+                else:
+                    pass
+
+        for port in self.Nscan[host]['tcp'].keys():
+            print('\n\033[0mPort: (\033[00;92m{}\033[0m), State: (\033[00;92m{}\033[0m)'.format(port, self.Nscan[host]['tcp'][port]['state']))
+            print('\033[0mService: (\033[00;92m{}\033[0m), Version: (\033[00;92m{}\033[0m)'.format(self.Nscan[host]['tcp'][port]['name'], self.Nscan[host]['tcp'][port]['product']))
+            print('\033[0mReason: (\033[00;92m{}\033[0m), Cpe: (\033[00;92m{}\033[0m)'.format(self.Nscan[host]['tcp'][port]['reason'], self.Nscan[host]['tcp'][port]['cpe']))
+            for key in self.Nscan[host]['tcp'][port]:
+                if 'script' == key:
+                    scripts = list(self.Nscan[host]['tcp'][port]['script'])
+                    for scripting in scripts:
+                        print('Script Exploration: {}'.format(scripting))
+                else:
+                    pass
+
+
+
+# Tratar parametros, se inseridos completamentes:
+if not options.target and not options.port and not options.command:
+    system('bash ./banner.sh')
+    print("Ops! faltou parametros, tente => --help/-h para ajuda !")
+    exit(1)
+else:
+    if options.target:
+        if options.port:
+            if options.command:
+                pass
             else:
-                print('Insira a porta')
+                print('Ops! Faltou 1 paramêtro => "command_line"')
+                exit(1)
+        else:
+            print('Ops! Faltou 2 parâmetros => "port" e "command_line"')
+            exit(1)
+
+    # Tratar o protocolo, se começa com 'http' ou 'https' ou 'www':
+    if(options.target.lower() [0:7] == "http://" or options.target.lower()[0:8] == 'https://' or options.target.lower() [0:3] == "www"):
+        print('Insira apenas o domínio, não precisa expecificar o protocolo "http" ou "https" ou "www"')
+        exit(1)
+    else:
+        
+        Nmap_Scan = Nmap(options.target, options.port, options.command)
+        Nmap_Scan.scanning()
+        Nmap_Scan.prints()
