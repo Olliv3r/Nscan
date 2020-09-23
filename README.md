@@ -42,7 +42,6 @@ Usage: Nscan.py [options]
 # Cada opcão
 
 -h, --help 	exibe uma ajuda simples
--?, -all 	exibe uma ajuda simples
 -t, --target 	Seta um IP ou site a ser escaneado
 -p, --port 	seta uma ou mais portas expecificas
 -c, --command	Seta um tipo de scanner (Service/Version/detection de sistemas operacionais
@@ -53,6 +52,16 @@ Usage: Nscan.py [options]
 
 ./Nscan.py --target=testphp.vulnweb.com --port=21 --command=-A
 ./Nscan.py --target=testphp.vulnweb.com --port=21-443 --command='-sS -sV -A'
+
+# Tipo de dados do resultado do scan:
+
+Service - (SSH/FTP)
+Version - (Nginx/apache2)
+Hostname - (ip Adress)
+State - (Open/filtered)
+Script Exploration - (http-server-header.nse/http-brute.nse)
+Reason - (no-response/Syn-ack)
+Cpe - (*nginx.1.3.3e/*)
 
 
 Copyright © Nscan 2020
