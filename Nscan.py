@@ -55,7 +55,7 @@ class Nmap:
         self.command_root = ['-sS', '-sU', '-O', '-PO', '-PU', '-PY', '--traceroute', '-sA', '-sW', '-sM', '-sN', '-sF', '-sX', '-sY', '-sZ', '-sO', '-f', '--badsum', '-6']
         self.command_noroot = ['-sV', '-Pn', '-A', '-v']
         self.command_all = self.command_root.append(self.command_noroot)
-
+    # Metodo scanning
     def scanning(self):
         try:
             print('Starting Nscan {} ( {} ) at {}-{}-{} {}:{} -{}'.format(self.version, self.Ip_Adress, self.times[0], self.times[1], self.times[2], self.times[3], self.times[4], self.times[5]))
@@ -65,7 +65,7 @@ class Nmap:
         except nmap.nmap.PortScannerError as error:
             print(error)
 
-
+    # Metodo prints
     def prints(self):
         for host in self.Nscan.all_hosts():
             self.Temporary_Records.append(self.Nscan.get_nmap_last_output())
